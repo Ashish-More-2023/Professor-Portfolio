@@ -43,6 +43,8 @@ SESSION_SECRET="SECRETKEY"
 PORT=5000 
 FRONTEND_URL=frontend_url 
 BACKEND_URL=backend_url 
+UPLOAD_PAGE_USERNAME="admin"
+UPLOAD_PAGE_PASSWORD="admin123"
 
 --Backend Setup:
 
