@@ -9,3 +9,20 @@ export const apiCall = async (endpoint) => {
   }
   return response.json();
 };
+
+export const resolveImageUrl = (url) => {
+  if (!url) return url;
+
+  const value = String(url);
+
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    const localhostPattern = /^https?:\/\/(localhost|127\.0\.0\.1):5000/;
+    return localhostPattern.test(value) ? value.replace(localhostPattern, API_BASE_URL) : value;
+  }
+
+  if (value.startsWith('/uploads/')) {
+    return `${API_BASE_URL}${value}`;
+  }
+
+  return value;
+};

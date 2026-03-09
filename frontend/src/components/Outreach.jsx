@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
 
 const OutreachCard = ({ outreach, index }) => {
   const isImageLeft = index % 2 === 0;
@@ -16,7 +16,7 @@ const OutreachCard = ({ outreach, index }) => {
           <div className="relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300">
             {outreach.imageUrl ? (
               <img
-                src={outreach.imageUrl}
+                src={resolveImageUrl(outreach.imageUrl)}
                 alt={outreach.title}
                 className="w-full h-96 object-cover hover:scale-105 transition-transform duration-500"
                 onError={(e) => {

@@ -35,8 +35,87 @@ const isProduction = process.env.NODE_ENV === 'production';
 const start = async () => {
   const app = express();
 
+  app.set('view engine', 'ejs');
+  app.set('views', path.join(__dirname, '../public'));
+
   // Trust proxy (CRITICAL for Render/Railway/Heroku)
   app.set('trust proxy', 1);
+
+  const uploadPageUser = process.env.UPLOAD_PAGE_USERNAME || 'admin';
+  const uploadPagePassword = process.env.UPLOAD_PAGE_PASSWORD || process.env.ADMIN_PASSWORD;
+  const uploadAuthCookieName = 'upload_page_auth';
+
+  const hasUploadAccess = (req) => {
+    const cookieHeader = req.headers.cookie || '';
+    return cookieHeader
+      .split(';')
+      .map((cookie) => cookie.trim())
+      .includes(`${uploadAuthCookieName}=1`);
+  };
+
+  const renderUploadPasswordPage = (errorMessage = '') => `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Access</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f4f7fb; font-family: "Segoe UI", Arial, sans-serif; }
+    .overlay { width: 100%; min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+    .modal { width: 100%; max-width: 360px; background: #fff; border: 1px solid #dbe3ee; border-radius: 12px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12); padding: 24px; }
+    h1 { margin: 0; font-size: 22px; text-align: center; color: #0f172a; }
+    p { margin: 10px 0 18px; text-align: center; color: #475569; font-size: 14px; }
+    label { display: block; margin-bottom: 8px; color: #1e293b; font-weight: 600; font-size: 14px; }
+    input { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 11px 12px; font-size: 14px; box-sizing: border-box; }
+    input:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12); }
+    button { width: 100%; margin-top: 12px; border: none; border-radius: 10px; background: #1d4ed8; color: #fff; padding: 12px 14px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #1e40af; }
+    .error { margin: 0 0 12px; padding: 10px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="modal">
+      <h1> Upload Page</h1>
+      <p>Enter password to continue to upload page.</p>
+      ${errorMessage ? `<div class="error">${errorMessage}</div>` : ''}
+      <form method="POST" action="/upload-auth">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required autocomplete="username" />
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" autofocus />
+        <button type="submit">Open Upload Page</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  app.get('/upload.html', (req, res) => {
+    if (!uploadPagePassword) {
+      return res.status(500).send('Upload page password is not configured');
+    }
+
+    if (hasUploadAccess(req)) {
+      return res.sendFile(path.join(__dirname, '../public/upload.html'));
+    }
+
+    return res.status(401).send(renderUploadPasswordPage());
+  });
+
+  // Session configuration
+  const sessionConfig = {
+    secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false,
+      sameSite:'lax',
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+    name: 'adminjs-session'
+  };
 
   // Serve static files FIRST
   app.use(express.static(path.join(__dirname, '../public')));
@@ -64,7 +143,7 @@ const start = async () => {
     }
     
     if (!isProduction) {
-      allowedOrigins.push('http://localhost:5173', 'http://localhost:3000');
+      allowedOrigins.push('http://localhost:5173', 'http://localhost:5175', 'http://localhost:3000');
     }
 
     return cors({
@@ -109,20 +188,6 @@ const start = async () => {
     },
   });
 
-  // Session configuration
-  const sessionConfig = {
-    secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: false,
-      sameSite:'lax',
-      maxAge: 1000 * 60 * 60 * 24,
-    },
-    name: 'adminjs-session'
-  };
-
   // Authentication
   const authenticate = async (email, password) => {
     try {
@@ -156,7 +221,96 @@ const start = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Image Upload Endpoint
+  app.post('/upload-auth', (req, res) => {
+    const submittedUsername = String(req.body?.username || '').trim();
+    const submittedPassword = String(req.body?.password || '');
+
+    if (!uploadPagePassword) {
+      return res.status(500).send('Upload page password is not configured');
+    }
+
+    if (submittedUsername !== uploadPageUser || submittedPassword !== uploadPagePassword) {
+      return res.status(401).send(renderUploadPasswordPage('Incorrect username or password. Please try again.'));
+    }
+
+    const cookieParts = [
+      `${uploadAuthCookieName}=1`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Lax',
+      `Max-Age=${60 * 60 * 24}`
+    ];
+
+    if (isProduction) {
+      cookieParts.push('Secure');
+    }
+
+    res.setHeader('Set-Cookie', cookieParts.join('; '));
+    return res.redirect('/upload.html');
+  });
+
+  app.post('/upload-logout', (req, res) => {
+    const clearCookieParts = [
+      `${uploadAuthCookieName}=`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Lax',
+      'Max-Age=0'
+    ];
+
+    if (isProduction) {
+      clearCookieParts.push('Secure');
+    }
+
+    res.setHeader('Set-Cookie', clearCookieParts.join('; '));
+    return res.json({ success: true });
+  });
+
+  app.post('/api/reset-password-secure', async (req, res) => {
+    try {
+      const { email, oldPassword, newPassword } = req.body;
+
+      if (!email || !oldPassword || !newPassword) {
+        return res.status(400).json({ error: 'Email, current password, and new password are required' });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+      }
+
+      if (oldPassword === newPassword) {
+        return res.status(400).json({ error: 'New password must be different from current password' });
+      }
+
+      const user = await prisma.adminUser.findUnique({
+        where: { email: String(email).trim().toLowerCase() }
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const isCurrentPasswordValid = await bcrypt.compare(oldPassword, user.encryptedPassword);
+
+      if (!isCurrentPasswordValid) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      await prisma.adminUser.update({
+        where: { id: user.id },
+        data: { encryptedPassword: hashedPassword }
+      });
+
+      return res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+      console.error('Secure reset password error:', error);
+      return res.status(500).json({ error: 'Failed to reset password' });
+    }
+  });
+
+  // Image Upload Endpoint 
   app.post('/api/upload', upload.single('image'), (req, res) => {
     try {
       if (!req.file) {
@@ -175,6 +329,110 @@ const start = async () => {
       console.error('Upload error:', error);
       return res.status(500).json({ error: 'Failed to upload image' });
     }
+  });
+
+  app.post('/api/publications/bulk-upload', (req, res) => {
+    excelUpload.single('file')(req, res, async (uploadError) => {
+      if (uploadError) {
+        return res.status(400).json({ error: uploadError.message || 'File upload failed' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const filePath = req.file.path;
+
+      try {
+        const workbook = xlsx.readFile(filePath);
+        const firstSheetName = workbook.SheetNames[0];
+
+        if (!firstSheetName) {
+          return res.status(400).json({ error: 'Uploaded file does not contain any sheet' });
+        }
+
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawRows = xlsx.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (!rawRows.length) {
+          return res.status(400).json({ error: 'Uploaded file is empty' });
+        }
+
+        const normalizeRowKeys = (row) => {
+          const normalized = {};
+          Object.entries(row).forEach(([key, value]) => {
+            normalized[String(key).trim().toLowerCase()] = value;
+          });
+          return normalized;
+        };
+
+        const toTrimmedString = (value) => String(value ?? '').trim();
+        const parseBoolean = (value) => {
+          const normalized = toTrimmedString(value).toLowerCase();
+          if (!normalized) return true;
+          return ['true', '1', 'yes', 'y'].includes(normalized);
+        };
+
+        const normalizedRows = rawRows
+          .map(normalizeRowKeys)
+          .filter((row) =>
+            Object.values(row).some((value) => toTrimmedString(value) !== '')
+          );
+
+        if (!normalizedRows.length) {
+          return res.status(400).json({ error: 'Uploaded file contains only empty rows' });
+        }
+
+        const records = normalizedRows.map((row, index) => {
+          const title = toTrimmedString(row.title);
+          const authors = toTrimmedString(row.authors);
+          const venue = toTrimmedString(row.venue);
+          const doi = toTrimmedString(row.doi);
+          const publisher = toTrimmedString(row.publisher);
+          const year = Number.parseInt(toTrimmedString(row.year), 10);
+
+          if (!title || !authors || !venue || !doi || !publisher || Number.isNaN(year)) {
+            throw new Error(
+              `Invalid data at row ${index + 2}. Required: title, authors, venue, year, doi, publisher`
+            );
+          }
+
+          const parsedOrder = Number.parseInt(toTrimmedString(row.order), 10);
+
+          return {
+            title,
+            authors,
+            venue,
+            year,
+            doi, 
+            publisher,
+            order: Number.isNaN(parsedOrder) ? index : parsedOrder,
+            isVisible: parseBoolean(row.isvisible)
+          };
+        });
+
+        await prisma.publicationPage.createMany({
+          data: records
+        });
+
+        return res.json({
+          success: true,
+          insertedCount: records.length,
+          message: `Successfully uploaded ${records.length} publication(s)`
+        });
+      } catch (error) {
+        console.error('Bulk upload error:', error);
+        return res.status(400).json({ error: error.message || 'Bulk upload failed' });
+      } finally {
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (cleanupError) {
+          console.error('Failed to cleanup temp upload file:', cleanupError);
+        }
+      }
+    });
   });
 
   // API Routes for Frontend
@@ -420,7 +678,28 @@ const start = async () => {
     }
   });
 
+  app.get('/api/industry', async (req, res) => {
+    try {
+      const industry = await prisma.industry.findMany({
+        where: { isVisible: true },
+        orderBy: { order: 'asc' }
+      });
+      return res.json(industry);
+    } catch (error) {
+      console.error('Industry fetch error:', error);
+      return res.status(500).json({ error: 'Failed to fetch industry data' });
+    }
+  });
+
   // Root endpoint
+  app.get('/reset-password', (req, res) => {
+    return res.render('reset-password');
+  });
+
+  app.get('/reset-password.html', (req, res) => {
+    return res.redirect('/reset-password');
+  });
+
   app.get('/', (req, res) => {
     return res.json({ 
       status: 'running',

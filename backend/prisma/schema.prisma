@@ -385,6 +385,21 @@ model Outreach {
   @@index([order])
 }
 
+// Industry Experience
+model Industry {
+  id              Int      @id @default(autoincrement())
+  companyName     String
+  location        String
+  role            String
+  companyLogo     String?
+  order           Int      @default(0)
+  isVisible       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([order])
+}
+
 
 // Site Settings (for navbar, footer, etc.)
 model SiteSettings {

@@ -22,7 +22,9 @@ function Publications() {
   return (
     <section className="space-y-4 mb-10">
       <div>
-        <h2 className="text-4xl font-bold text-gray-900">Publications</h2>
+        <h2 className="text-4xl font-bold text-gray-900">
+          Publications <span className="text-xl font-semibold text-gray-700">(Selected, Recent)</span>
+        </h2>
       </div>
 
       <div className="space-y-6">
@@ -42,7 +44,7 @@ function Publications() {
               </h3>
 
               <p className="mt-1 text-sm text-gray-600">
-                {pub.authors} • {pub.venue},{" "}
+                {pub.authors} • <span className="font-semibold">{pub.venue}</span>,{" "}
                 <time dateTime={String(pub.year)}>{pub.year}</time>
               </p>
 

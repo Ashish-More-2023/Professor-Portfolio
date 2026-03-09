@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
+import CVFile from "../assets/CV_VIBIN.pdf";
 
 const SectionHeading = ({ children }) => (
   <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-green-700 mt-8 md:mt-10 mb-3 md:mb-4">{children}</h2>
@@ -75,7 +76,7 @@ const Resume = () => {
             <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg border-4 border-green-300 bg-white">
               {profile.profileImage ? (
                 <img 
-                  src={profile.profileImage} 
+                  src={resolveImageUrl(profile.profileImage)} 
                   alt={profile.name} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -127,6 +128,16 @@ const Resume = () => {
                   </a>
                 </p>
               )}
+              <p>
+                <a
+                  href={CVFile}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-1 rounded-md transition-colors"
+                >
+                  CV
+                </a>
+              </p>
             </div>
             
             {/* Download Button */}
@@ -213,7 +224,7 @@ const Resume = () => {
                   </p>
                   {e.journalImage && (
                     <img 
-                      src={e.journalImage} 
+                      src={resolveImageUrl(e.journalImage)} 
                       alt={e.journalTitle} 
                       className="w-40 sm:w-48 h-16 sm:h-20 object-contain mt-2 ml-2 sm:ml-4"
                       onError={(e) => e.target.style.display = 'none'}
@@ -257,7 +268,7 @@ const Resume = () => {
                     {pub.authors}
                   </p>
                   <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                    <span className="italic">{pub.venue}</span>, {pub.year}
+                    <span className="font-semibold">{pub.venue}</span>, {pub.year}
                   </p>
                   <div className="flex flex-col sm:flex-row sm:gap-6 gap-2 text-xs sm:text-sm text-gray-700">
                     <p>

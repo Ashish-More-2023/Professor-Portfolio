@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
+
+const trimText = (value = "") => String(value).trim();
+const normalizeDescription = (value = "") =>
+  String(value ?? "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/\n\s*\n+/g, "\n")
+    .trim();
 
 
 const ResearchCard = ({ research, index }) => {
@@ -17,7 +24,7 @@ const ResearchCard = ({ research, index }) => {
           <div className="relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300">
             {research.imageUrl ? (
               <img
-                src={research.imageUrl}
+                src={resolveImageUrl(research.imageUrl)}
                 alt={research.title}
                 className="w-full h-96 object-cover hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -35,13 +42,13 @@ const ResearchCard = ({ research, index }) => {
         </div>
 
 
-        <div className="w-full lg:w-1/2 space-y-6">
+        <div className="w-full lg:w-1/2 space-y-4">
           <div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">
               {research.title}
             </h2>
-            <p className="text-gray-700 leading-relaxed text-lg">
-              {research.description}
+            <p className="text-gray-700 leading-relaxed text-lg m-0 text-justify">
+              {normalizeDescription(research.description)}
             </p>
           </div>
 
@@ -60,10 +67,10 @@ const ResearchCard = ({ research, index }) => {
                     <h4 className="font-semibold text-gray-900 mb-2">
                       {pub.title}
                     </h4>
-                    <p className="text-sm text-gray-600 mb-1">{pub.authors}</p>
+                    <p className="text-sm text-gray-600 mb-1">{trimText(pub.authors)}</p>
                     <p className="text-sm text-gray-500">
-                      <span className="font-medium">{pub.journal}</span> (
-                      {pub.year}) • DOI: {pub.doi}
+                      <span className="font-medium">{trimText(pub.journal)}</span> (
+                      {pub.year}) • DOI: {trimText(pub.doi)}
                     </p>
                   </li>
                 ))}
@@ -102,7 +109,7 @@ function Research() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading research areas...</p>
+          <p className="mt-4 text-gray-600">{trimText("Loading research areas...")}</p>
         </div>
       </div>
     );
@@ -113,7 +120,7 @@ function Research() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100">
         <div className="text-center">
-          <p className="text-red-600">Error: {error}</p>
+          <p className="text-red-600">{trimText(`Error: ${error}`)}</p>
           <button 
             onClick={() => window.location.reload()} 
             className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700"
@@ -130,8 +137,8 @@ function Research() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100">
         <div className="text-center">
-          <p className="text-gray-600">No research areas available</p>
-          <p className="text-sm text-gray-500 mt-2">Please add research data in the admin panel</p>
+          <p className="text-gray-600">{trimText("No research areas available")}</p>
+          <p className="text-sm text-gray-500 mt-2">{trimText("Please add research data in the admin panel")}</p>
         </div>
       </div>
     );
