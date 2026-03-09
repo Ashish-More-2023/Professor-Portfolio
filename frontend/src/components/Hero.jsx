@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SubHero from "./SubHero";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
 
 
 function Hero() {
@@ -82,7 +82,7 @@ function Hero() {
           <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl ring-4 ring-gray-100 ring-offset-4 ring-offset-slate-200 flex-shrink-0">
             {heroData.profileImage ? (
               <img
-                src={heroData.profileImage}
+                src={resolveImageUrl(heroData.profileImage)}
                 alt={heroData.name}
                 className="h-full w-full object-cover"
                 onError={(e) => {
@@ -99,6 +99,9 @@ function Hero() {
           
           {/* Content Section */}
           <div className="flex-1 max-w-2xl text-center lg:text-left px-4 lg:px-0">
+            <p className="text-lg sm:text-xl font-bold uppercase tracking-wide mb-2 bg-linear-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+              Profile
+            </p>
             
             {/* Name */}
             <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl pb-4 md:pb-6 text-transparent bg-gradient-to-r from-gray-800 to-slate-900 bg-clip-text">

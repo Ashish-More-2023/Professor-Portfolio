@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
+
+const trimText = (value = "") => String(value).trim();
 
 function ToolCard({ tool, rightImage = false }) {
   return (
@@ -12,12 +14,12 @@ function ToolCard({ tool, rightImage = false }) {
       <div className="flex-shrink-0 w-full md:w-60 lg:w-72 flex items-center justify-center">
         {tool.imageUrl ? (
           <img
-            src={tool.imageUrl}
+            src={resolveImageUrl(tool.imageUrl)}
             alt={tool.title}
             className="w-48 h-48 object-contain rounded-xl border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.style.display = 'none';
+              e.target.style.display = "none";
               e.target.parentElement.innerHTML = `<div class="w-48 h-48 rounded-xl border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow flex items-center justify-center text-5xl font-bold text-blue-600">${tool.title.charAt(0)}</div>`;
             }}
           />
@@ -44,15 +46,17 @@ function ToolCard({ tool, rightImage = false }) {
             tool.title
           )}
         </h3>
-        <p className="text-gray-700 text-sm md:text-md mb-2">{tool.description}</p>
+        <p className="text-gray-700 text-sm md:text-md mb-2">
+          {trimText(tool.description)}
+        </p>
         <p className="text-xs md:text-sm text-gray-600">
-          <span className="font-semibold">Reference:</span> {tool.reference}
+          <span className="font-semibold">Reference:</span>{" "}
+          {trimText(tool.reference)}
         </p>
       </div>
     </div>
   );
 }
-
 
 function ComputationalToolsPage() {
   const [tools, setTools] = useState([]);
@@ -60,13 +64,13 @@ function ComputationalToolsPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    apiCall('/api/computational-tools')
-      .then(data => {
+    apiCall("/api/computational-tools")
+      .then((data) => {
         setTools(data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error('Error fetching computational tools:', err);
+      .catch((err) => {
+        console.error("Error fetching computational tools:", err);
         setError(err.message);
         setLoading(false);
       });
@@ -77,7 +81,9 @@ function ComputationalToolsPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading computational tools...</p>
+          <p className="mt-4 text-gray-600">
+            {trimText("Loading computational details...")}
+          </p>
         </div>
       </div>
     );
@@ -87,9 +93,9 @@ function ComputationalToolsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="text-center">
-          <p className="text-red-600">Error: {error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <p className="text-red-600">{trimText(`Error: ${error}`)}</p>
+          <button
+            onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Retry
@@ -103,8 +109,12 @@ function ComputationalToolsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="text-center">
-          <p className="text-gray-600">No computational tools available</p>
-          <p className="text-sm text-gray-500 mt-2">Please add tools in the admin panel</p>
+          <p className="text-gray-600">
+            {trimText("No computational details available")}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            {trimText("Please add tools in the admin panel")}
+          </p>
         </div>
       </div>
     );
@@ -115,19 +125,17 @@ function ComputationalToolsPage() {
       <div className="max-w-5xl mx-auto">
         <header className="mb-12">
           <h1 className="text-3xl md:text-4xl font-extrabold text-blue-900 mb-2">
-            Computational Tools / Web Servers
+            Computational Details / Web Servers
           </h1>
           <p className="text-base md:text-lg text-gray-700">
-            Selected computational tools, bioinformatics web servers, and their benchmark references from our group.
+            {trimText(
+              "Selected computational details, bioinformatics web servers, and their benchmark references from our group.",
+            )}
           </p>
         </header>
         <section>
           {tools.map((tool, idx) => (
-            <ToolCard
-              tool={tool}
-              rightImage={idx % 2 === 1}
-              key={tool.id}
-            />
+            <ToolCard tool={tool} rightImage={idx % 2 === 1} key={tool.id} />
           ))}
         </section>
       </div>

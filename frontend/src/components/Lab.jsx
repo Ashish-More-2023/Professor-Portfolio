@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
 
 
 function SimpleStudentCard({ student }) {
@@ -102,7 +102,7 @@ const PISection = ({ pi, images }) => (
     {/* PI Profile */}
     <div className="flex flex-col items-center md:items-start w-full md:w-1/2 space-y-4">
       <img
-        src={pi.photo}
+        src={resolveImageUrl(pi.photo)}
         alt={pi.name}
         className="w-36 h-36 rounded-full border-4 border-purple-200 shadow-lg object-cover"
       />
@@ -134,7 +134,7 @@ const ProjectSection = ({ projects }) => (
         >
           <div className="w-full md:w-1/2">
             <img
-              src={project.imageUrl}
+              src={resolveImageUrl(project.imageUrl)}
               alt={project.title}
               className="w-full h-72 object-cover rounded-2xl shadow-lg"
             />
@@ -156,26 +156,29 @@ const ProjectSection = ({ projects }) => (
 
 function PhdStudentCard({ student }) {
   return (
-    <div className="w-72 h-80 rounded-3xl overflow-hidden shadow-xl relative flex items-end border-4 border-blue-200 bg-slate-200">
-      {/* Full background image */}
-      <img
-        src={student.photo || "/images/students/placeholder.jpg"}
-        alt={student.name}
-        className="absolute inset-0 w-full h-full object-cover object-top"
-      />
-      <div className="w-full z-10 p-5 pb-6 bg-gradient-to-t from-blue-600/90 via-blue-400/60 to-blue-300/10">
-        <h3 className="text-2xl font-bold text-white mb-1 drop-shadow">{student.name}</h3>
+    <div className="w-72">
+      <div className="rounded-3xl overflow-hidden shadow-xl border-4 border-blue-200 bg-white">
+        <div className="h-64 w-full bg-slate-200">
+          <img
+            src={resolveImageUrl(student.photo) || "/images/students/placeholder.jpg"}
+            alt={student.name}
+            className="w-full h-full object-cover object-top"
+          />
+        </div>
+      </div>
+      <div className="mt-3 px-2">
+        <h3 className="text-2xl font-bold text-blue-900 mb-1">{student.name}</h3>
         {student.title && (
-          <p className="text-md font-semibold text-white mb-0.5 drop-shadow">{student.title}</p>
+          <p className="text-md font-semibold text-blue-700 mb-0.5">{student.title}</p>
         )}
         {student.field && (
-          <p className="text-white/90">{student.field}</p>
+          <p className="text-gray-700">{student.field}</p>
         )}
         {student.presentPosition && (
-          <p className="text-white/80 mt-2 text-sm">{student.presentPosition}</p>
+          <p className="text-gray-600 mt-2 text-sm">{student.presentPosition}</p>
         )}
         {student.note && (
-          <p className="text-white/80 mt-1 text-xs">{student.note}</p>
+          <p className="text-gray-500 mt-1 text-xs">{student.note}</p>
         )}
       </div>
     </div>
@@ -283,7 +286,7 @@ function Lab() {
         {/* PI + Carousel section */}
         <PISection
           pi={profile}
-          images={carouselImages && carouselImages.length > 0 ? carouselImages.map(img => img.imageUrl) : []}
+          images={carouselImages && carouselImages.length > 0 ? carouselImages.map(img => resolveImageUrl(img.imageUrl)) : []}
         />
         
         {/* Projects Section */}

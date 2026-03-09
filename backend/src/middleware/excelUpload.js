@@ -14,10 +14,15 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'text/csv'
+    'text/csv',
+    'application/csv',
+    'text/plain'
   ];
+
+  const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+  const fileExtension = path.extname(file.originalname || '').toLowerCase();
   
-  if (allowedTypes.includes(file.mimetype)) {
+  if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
     cb(null, true);
   } else {
     cb(new Error('Only .xlsx, .xls, and .csv files are allowed'), false);

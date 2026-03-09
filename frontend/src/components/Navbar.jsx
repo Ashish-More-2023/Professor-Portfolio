@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import DefaultLogo from "../assets/iitg_logo.jpg";
-import { apiCall } from "../config/api";
+import { apiCall, resolveImageUrl } from "../config/api";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,14 +30,15 @@ function Navbar() {
     { to: "/publications", label: "Publications" },
     { to: "/patents", label: "Patents" },
     { to: "/outreach", label: "Outreach" },
-    { to: "/computational-tools", label: "Computational Tools" },
+    { to: "/computational-tools", label: "Computational Details" },
+    { to: "/industry", label: "Industry" },
   ];
 
   return (
     <nav className="w-full px-4 md:px-8 py-4 flex items-center justify-between bg-white shadow-sm border-b border-gray-200 z-50 relative">
       <div className="flex items-center h-14 lg:h-20">
         <img
-          src={logoUrl}
+          src={resolveImageUrl(logoUrl)}
           alt="Logo"
           className="h-full w-auto max-w-[400px] object-contain"
           onError={(e) => {

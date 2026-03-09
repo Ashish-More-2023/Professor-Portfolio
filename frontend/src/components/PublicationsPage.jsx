@@ -5,7 +5,9 @@ function PublicationsSection({ publications }) {
   if (!publications || publications.length === 0) {
     return (
       <section className="space-y-8 mb-12">
-        <h2 className="text-4xl font-bold text-blue-900">Publications</h2>
+        <h2 className="text-4xl font-bold text-blue-900">
+          Publications <span className="text-xl font-semibold text-blue-800">(Selected, Recent)</span>
+        </h2>
         <p className="text-gray-600">No publications available</p>
       </section>
     );
@@ -14,7 +16,9 @@ function PublicationsSection({ publications }) {
   return (
     <section className="space-y-8 mb-12">
       <div>
-        <h2 className="text-4xl font-bold text-blue-900">Publications</h2>
+        <h2 className="text-4xl font-bold text-blue-900">
+          Publications <span className="text-xl font-semibold text-blue-800">(Selected, Recent)</span>
+        </h2>
       </div>
       <div className="space-y-6">
         {publications.map(pub => (
@@ -28,7 +32,7 @@ function PublicationsSection({ publications }) {
                 {pub.title}
               </h3>
               <p className="mt-1 text-sm text-gray-600">
-                {pub.authors} • {pub.venue}, <time dateTime={String(pub.year)}>{pub.year}</time>
+                {pub.authors} • <span className="font-semibold">{pub.venue}</span>, <time dateTime={String(pub.year)}>{pub.year}</time>
               </p>
               <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center space-x-2 text-sm">

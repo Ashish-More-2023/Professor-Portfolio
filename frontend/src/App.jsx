@@ -11,6 +11,7 @@ import PublicationsPage from "./components/PublicationsPage";
 import PatentsPage from "./components/PatentsPage";
 import Outreach from "./components/Outreach";
 import ComputationalTools from "./components/ComputationalTools";
+import Industry from "./components/Industry";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/patents" element={<PatentsPage />} />
             <Route path="/outreach" element={<Outreach />} />
             <Route path="/computational-tools" element={<ComputationalTools />} />
+            <Route path="/industry" element={<Industry />} />
           </Routes>
         </main>
         <Footer />

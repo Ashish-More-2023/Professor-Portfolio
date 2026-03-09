@@ -97,6 +97,24 @@ export const resources = [
         sortBy: 'order',
         direction: 'asc'
       },
+      actions: {
+        new: {
+          before: async (request) => {
+            if (request.payload?.description !== undefined) {
+              request.payload.description = String(request.payload.description).trim();
+            }
+            return request;
+          }
+        },
+        edit: {
+          before: async (request) => {
+            if (request.payload?.description !== undefined) {
+              request.payload.description = String(request.payload.description).trim();
+            }
+            return request;
+          }
+        }
+      },
       properties: {
         title: {
           type: 'string',
@@ -810,6 +828,41 @@ export const resources = [
       listProperties: ['title', 'order', 'url', 'createdAt'],
       editProperties: ['title', 'description', 'reference', 'imageUrl', 'url', 'order'],
       showProperties: ['title', 'description', 'reference', 'imageUrl', 'url', 'order', 'createdAt', 'updatedAt'],
+    }
+  },
+  {
+    resource: {
+      model: getModelByName('Industry'),
+      client: prisma
+    },
+    options: {
+      navigation: { name: 'Industry', icon: 'Factory' },
+      sort: { sortBy: 'order', direction: 'asc' },
+      properties: {
+        companyName: {
+          type: 'string'
+        },
+        location: {
+          type: 'string'
+        },
+        role: {
+          type: 'string'
+        },
+        companyLogo: {
+          type: 'string',
+          description: '📸 Upload at http://localhost:5000/upload.html'
+        },
+        order: {
+          type: 'number',
+          description: 'Lower appears first'
+        },
+        isVisible: {
+          type: 'boolean',
+          description: 'Show/hide on website'
+        },
+        createdAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
+        updatedAt: { isVisible: { list: true, filter: true, show: true, edit: false } }
+      }
     }
   },
   // Site Settings

@@ -1,5 +1,7 @@
 import React from "react";
 
+const trimText = (value = "") => String(value).trim();
+
 function PatentCard({ item, index, categoryType }) {
   // Different styles based on category
   const isInternational = categoryType === "International Patent";
@@ -44,7 +46,7 @@ function PatentCard({ item, index, categoryType }) {
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${badgeColor} border`}
             >
-              {item.status}
+              {trimText(item.status)}
             </span>
             {isInternational && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 border border-purple-300">
@@ -56,7 +58,7 @@ function PatentCard({ item, index, categoryType }) {
 
         {/* Title */}
         <h3 className="text-xl font-bold text-gray-900 mb-4 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
-          {item.title || item.name}
+          {trimText(item.title || item.name)}
         </h3>
 
         {/* Inventors or Description */}
@@ -65,7 +67,7 @@ function PatentCard({ item, index, categoryType }) {
             {isTool ? "Description" : "Inventors"}
           </p>
           <p className="text-gray-700 leading-relaxed text-sm">
-            {item.inventors || item.description}
+            {trimText(item.inventors || item.description)}
           </p>
         </div>
 
@@ -77,7 +79,7 @@ function PatentCard({ item, index, categoryType }) {
                 Patent No:
               </span>
               <span className="text-sm font-mono text-gray-800 font-medium">
-                {item.patentNo}
+                {trimText(item.patentNo)}
               </span>
             </div>
           )}
@@ -87,7 +89,7 @@ function PatentCard({ item, index, categoryType }) {
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide min-w-24">
                 Date:
               </span>
-              <span className="text-sm text-gray-800">{item.date}</span>
+              <span className="text-sm text-gray-800">{trimText(item.date)}</span>
             </div>
           )}
 
@@ -97,7 +99,7 @@ function PatentCard({ item, index, categoryType }) {
                 Reference
               </p>
               <p className="text-xs text-gray-600 leading-relaxed italic">
-                {item.reference}
+                {trimText(item.reference)}
               </p>
             </div>
           )}
